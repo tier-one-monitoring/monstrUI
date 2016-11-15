@@ -1,33 +1,43 @@
-var app = angular.module('MonstrApp',[]);
+var app = angular.module('MonstrApp',['MonstrApp.directives']);
 
-app.controller('maincontroller', function(){
-	$(window).load(function(){
-		CMSJobStatus.startApp("#CMSJobStatus_AppHolder");
-                console.log('Maincontroller started');
-	});
-})
+app.controller('maincontroller', function($scope){
+  
+  $(window).load(function(){
+    //SSB.startApp("#SSB_AppHolder");
+    //CMSJobStatus.startApp("#CMSJobStatus_AppHolder");
+    $scope.modules = {
+      'SSB': SSB,
+      'CMSJobStatus': CMSJobStatus
+    };
+  });
+});
 
 app.directive('bigbox', function(){
-	return{
-		restrict:'E',
-		templateUrl: 'dist/js/directives/bigbox.html',
-		scope:{	boxName:'@boxName'}
+  return{
+    restrict:'E',
+    templateUrl: 'dist/js/directives/bigbox.html',
+    scope:{ boxName:'@boxName'}
               };
 });
 
 app.directive('mediumbox', function(){
-        return{
-                restrict:'E',
-                templateUrl: 'dist/js/directives/mediumbox.html',
-                scope:{ boxName:'@boxName'}
-              };
+  return{
+          restrict:'E',
+          templateUrl: 'dist/js/directives/mediumbox.html',
+          scope:{ boxName:'@boxName'}
+        };
 });
-
-app.directive('smallbox', function(){
-        return{
-                restrict:'E',
-                templateUrl: 'dist/js/directives/smallbox.html',
-                scope:{ boxName:'@boxName'}
-              };
-});
+angular.module('MonstrApp.directives', []).directive('smallbox', ['$timeout', function(timer){
+  return{
+          link: function (scope, elem, attrs, ctrl) {
+            var run = function() {
+              scope.$parent.modules[scope.boxName].startApp(scope.boxName);
+            };
+            timer(run, 500);
+          },
+          restrict:'E',
+          templateUrl: 'dist/js/directives/smallbox.html',
+          scope:{ boxName:'@boxName'}
+        };
+}]);
 

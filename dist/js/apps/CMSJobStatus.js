@@ -2,7 +2,7 @@ var CMSJobStatus = {
 
     Configuration: {
         locale: 'en',
-        ssb_status_url: "https://lcgsens01o.jinr.ru/rest/CMSJobStatus/lastStatus?delta=1",
+        status_url: "https://lcgsens01o.jinr.ru/rest/CMSJobStatus/lastStatus?delta=1",
     },
 
     Utils: {
@@ -129,17 +129,17 @@ var CMSJobStatus = {
 
     //============================================================================
     Controller: {
-        appHolderId: '',
+        app_name: '',
 
-        startApp: function(appHolderId) {
-            this.appHolderId = appHolderId;
-            CMSJobStatus.View.initialize(appHolderId);
+        startApp: function(app_name) {
+            this.app_name = app_name;
+            CMSJobStatus.View.initialize('#' + app_name + '_AppHolder');
             CMSJobStatus.Controller.loadStatus();
         },
         // TODO: on Fail
         loadStatus: function() {
             $.ajax({
-                url:CMSJobStatus.Configuration.ssb_status_url,  
+                url:CMSJobStatus.Configuration.status_url,  
                 success: function(data) {
                    CMSJobStatus.Model.setJobStatus(data);
                    CMSJobStatus.View.fillStatusTableWithData();
@@ -155,8 +155,8 @@ var CMSJobStatus = {
             return CMSJobStatus.Model.sites;
         },
     },
-    startApp: function(appHolderId) {
-       CMSJobStatus.Controller.startApp(appHolderId);
+    startApp: function(app_name) {
+       CMSJobStatus.Controller.startApp(app_name);
     }
 };
 
