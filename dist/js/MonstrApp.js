@@ -7,7 +7,8 @@ app.controller('maincontroller', function($scope){
     //CMSJobStatus.startApp("#CMSJobStatus_AppHolder");
     $scope.modules = {
       'SSB': SSB,
-      'CMSJobStatus': CMSJobStatus
+      'CMSJobStatus': CMSJobStatus,
+      'PhedexQuality': PhedexQuality
     };
   });
 });
@@ -31,13 +32,20 @@ angular.module('MonstrApp.directives', []).directive('smallbox', ['$timeout', fu
   return{
           link: function (scope, elem, attrs, ctrl) {
             var run = function() {
-              scope.$parent.modules[scope.boxName].startApp(scope.boxName);
+              //scope.$parent.modules[scope.boxName].startApp(scope.boxName);
+              var options = {};
+              if (scope.boxOptions) {
+                options = scope.boxOptions;
+              }
+              var current = new scope.$parent.modules[scope.boxApp](scope.boxName, options);
+              
+              //app.startApp(scope.boxName);
             };
             timer(run, 500);
           },
           restrict:'E',
           templateUrl: 'dist/js/directives/smallbox.html',
-          scope:{ boxName:'@boxName'}
+          scope:{ boxApp: '@boxApp', boxName:'@boxName', boxDescription: '@boxDescription', boxOptions: '@boxOptions'}
         };
 }]);
 
