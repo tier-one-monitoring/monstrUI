@@ -6014,8 +6014,8 @@ button.close {
   line-break: auto;
 }
 .tooltip.in {
-  filter: alpha(opacity=90);
-  opacity: .9;
+  /*filter: alpha(opacity=90);*/
+  /*opacity: .9;*/
 }
 .tooltip.top {
   padding: 5px 0;

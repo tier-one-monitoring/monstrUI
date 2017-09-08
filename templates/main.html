@@ -21,6 +21,19 @@
     -->
     <link rel="stylesheet" href="dist/css/skins/skin-blue.min.css">
 
+    <style type="text/css"> 
+    .tooltip > .tooltip-inner {
+      background-color: rgb(54, 127, 169);
+    }
+    .tooltip-inner {
+      max-width: 1000px;
+      width: auto;
+    }
+/*    .tooltip {
+      opacity:0 !important;
+    }*/
+    </style>
+
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -213,6 +226,9 @@
     <script src="dist/js/apps/SSB.js"></script>
     <script src="dist/js/apps/PhedexQuality.js"></script>
     <script src="dist/js/apps/PhedexTransfers.js"></script>
+    <script type="javascript"> 
+    $('.tooltip-inner').css()
+    </script>
 
     </div><!-- ./wrapper -->
 

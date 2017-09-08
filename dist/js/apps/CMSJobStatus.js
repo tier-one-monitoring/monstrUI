@@ -4,6 +4,7 @@ var CMSJobStatus = function(app_name, options) {
     this.Configuration = {
         locale: 'en',
         jobs_summary_url: "https://lcgsens01o.jinr.ru/rest/CMSJobStatus/lastStatus",
+        module_status_url: "https://lcgsens01o.jinr.ru/rest/CMSJobStatus/getModuleStatus",
     };
 
     this.Utils = {
@@ -26,6 +27,8 @@ var CMSJobStatus = function(app_name, options) {
 
     this.Model = {
         jobStatus: null,
+        moduleStatus: null,
+        final_status: 0,
         sites: null,
         options: ['application_failed','app_succeeded','site_failed','aborted','cancelled'],
         options_data: {
@@ -69,6 +72,17 @@ var CMSJobStatus = function(app_name, options) {
             }
             this.jobStatus = series;
         },
+
+        setModuleStatus: function(response) {
+            if (response.success) {
+                this.moduleStatus = response.data;
+                var final_status = this.moduleStatus[0].status;
+                for (var i=0; i<this.moduleStatus.length; i++) {
+                    if (this.moduleStatus[i].status>final_status)
+                        final_status = this.moduleStatus[i].status;
+                }
+            }
+        }
     };
     //============================================================================
     //    VIEW
@@ -172,6 +186,14 @@ var CMSJobStatus = function(app_name, options) {
                 success: function(data) {
                     app.Model.setJobStatus(data);
                     app.View.fillStatusTableWithData();
+                }
+            });
+
+            get_status_ajax_call({
+                app_name: app.Controller.app_name,
+                url: app.Utils.createURL(app.Configuration.module_status_url, app.Configuration.options),
+                success: function(data) {
+                    app.Model.setModuleStatus(data);
                 }
             });
             setTimeout(app.Controller.loadStatus, 60000);

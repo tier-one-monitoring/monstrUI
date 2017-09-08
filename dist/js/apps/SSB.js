@@ -4,6 +4,7 @@ var SSB = function(app_name, options) {
     this.Configuration = {
         locale: 'en',
         status_url: "https://lcgsens01o.jinr.ru/rest/SSB/lastStatus?site_name=T1_RU_JINR",
+        module_status_url: "https://lcgsens01o.jinr.ru/rest/SSB/getModuleStatus",
     };
 
     this.Utils ={
@@ -11,6 +12,16 @@ var SSB = function(app_name, options) {
             var now = new Date().getTime();
             var error_time = new Date(time);
             return moment.duration(now - error_time).humanize();
+        },
+        createURL: function(base_url, options) {
+            base_url += '?';
+            for (var option in options) {
+                base_url += option;
+                base_url += '=';
+                base_url += options[option];
+                base_url += '&';
+            }
+            return base_url;
         },
     };
 
@@ -87,6 +98,14 @@ var SSB = function(app_name, options) {
                 success: function(data) {
                     app.Model.setStatus(data);
                     app.View.fillStatusTableWithData();
+                }
+            });
+
+            get_status_ajax_call({
+                app_name: app.Controller.app_name,
+                url: app.Utils.createURL(app.Configuration.module_status_url, app.Configuration.options),
+                success: function(data) {
+                    app.Model.setModuleStatus(data);
                 }
             });
             setTimeout(app.Controller.loadStatus, 60000);
