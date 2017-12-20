@@ -35,6 +35,15 @@ function set_module_status_tooltip(app_name, statuses) {
         20: 'Good',
         10: 'Excelent',
     };
+    
+    function compareStatusesNames(a, b){
+        if (a.name < b.name)
+            return -1;
+        if (a.name > b.name)
+            return 1;
+        return 0;
+    }
+    statuses.sort(compareStatusesNames);
 
     // Create status table which will be placed in tooltip
     var title = '<table style="white-space:nowrap; border: 1px solid white;">';
@@ -102,13 +111,17 @@ function get_status_ajax_call(call_obj) {
         url: call_obj.url,
         success: function(response) {
             if (response.success&&response.data.length>0) {
-                var final_status = response.data[0].status;
-                for (var i=0; i<response.data.length; i++) {
-                    if (response.data[i].status>final_status)
-                        final_status = response.data[i].status;
+                var data;
+                if (typeof(call_obj.filter) !== 'undefined') 
+                    data = call_obj.filter(response.data);
+                else
+                    data = response.data;
+                var final_status = data[0].status;
+                for (var i=0; i<data.length; i++) {
+                    if (data[i].status>final_status)
+                        final_status = data[i].status;
                 }
-                set_module_status_tooltip(call_obj.app_name, response.data);
-                call_obj.success(response);
+                set_module_status_tooltip(call_obj.app_name, data);
             }
         },
     });

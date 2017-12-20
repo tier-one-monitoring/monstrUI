@@ -104,9 +104,6 @@ var SSB = function(app_name, options) {
             get_status_ajax_call({
                 app_name: app.Controller.app_name,
                 url: app.Utils.createURL(app.Configuration.module_status_url, app.Configuration.options),
-                success: function(data) {
-                    app.Model.setModuleStatus(data);
-                }
             });
             setTimeout(app.Controller.loadStatus, 60000);
         },        

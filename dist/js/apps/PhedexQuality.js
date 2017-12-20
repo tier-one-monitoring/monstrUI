@@ -4,6 +4,7 @@ var PhedexQuality = function(app_name, options) {
     this.Configuration = {
         locale: 'en',
         phedex_quality_url: "https://lcgsens01o.jinr.ru/rest/PhedexQuality/lastStatus",
+        module_status_url: "https://lcgsens01o.jinr.ru/rest/PhedexQuality/getModuleStatus",
         options: {},
     };
 
@@ -142,6 +143,23 @@ var PhedexQuality = function(app_name, options) {
                 success: function(data) {
                     app.Model.setPhedexQuality(data.data);
                     app.View.createPhedexQualityPlots('#' + app.Controller.app_name + '_AppHolder', app.Model.phedex_quality);
+                }
+            });
+
+            get_status_ajax_call({
+                app_name: app.Controller.app_name,
+                url: app.Utils.createURL(app.Configuration.module_status_url, app.Configuration.options),
+                filter_options: options,
+                filter: function(data) {
+                    var result = [];
+                    console.log(this.filter_options);
+                    for (var i =0; i < data.length; i++){
+                        var name = data[i].name.toLowerCase();
+                        if ((name.indexOf(this.filter_options.instance) !== -1) && (name.indexOf(this.filter_options.direction) !== -1)) {
+                            result.push(data[i]);
+                        }
+                    }
+                    return result;
                 }
             });
             setTimeout(app.Controller.loadStatus, 600000);
