@@ -65,7 +65,12 @@ var SSB = function(app_name, options) {
                     $(this.app_holder_id + ' #' + prop).css('color', 'green');
                 }
                 else {
-                    $(this.app_holder_id + ' #' + prop).css('color', 'red');
+                    if (value == 'DOWNTIME' || value == 'Downtime'){
+                        $(this.app_holder_id + ' #' + prop).css('color', 'blue');
+                    }
+                    else {
+                        $(this.app_holder_id + ' #' + prop).css('color', 'red');
+                    }
                 }
                 $(this.app_holder_id + ' #' + prop).html(value);
             }
