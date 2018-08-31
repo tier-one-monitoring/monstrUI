@@ -52,22 +52,36 @@ var MonstrJournal = function(app_name, options) {
             this.datatable = $(this.app_holder_id + ' #monstr_journal_table').DataTable({
                 data: app.Model.data,
                 order: [[ 2, "asc" ]],
+                pageLength: 50,
                 columns: [
                     {title: "ID", data: "id", "width": "5%"},
                     {title: "Module", data: "module", "width": "10%"},
                     {
                         title: "Result",
                         data: "result",
+                        width: "10%",
                         render: function(data, type, row) {
                             if (type === 'display')
                                 if (data.indexOf('Fail') !== -1)
                                     return '<b style="color:red">' + data + '</b>';
                             return data;
                         },
-                        "width": "10%"
                     },
                     {title: "Step", data: "step", "width": "10%"},
-                    {title: "Time", data: "time"},
+                    {
+                        title: "Time", 
+                        data: "time",
+                        render: function(data, type, row) {
+                            var time = moment(data);
+                            if (type === 'display' || type === 'filter') {
+                                var human_time = time.format('H:mm');
+                                var human_data = time.format('DD MMM');
+                                var duration = moment.duration(moment() - time).humanize();
+                                return human_time + ' <span style="color:grey">' + human_data + ' (' + duration + ' ago) ' +'</span>';
+                            }
+                            return data;
+                        },
+                    },
                     {title: "Description", data: "description"},
                 ],
 
