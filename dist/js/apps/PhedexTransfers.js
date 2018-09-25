@@ -3,7 +3,7 @@ var PhedexTransfers = function(app_name, options) {
 
     this.Configuration = {
         locale: 'en',
-        status_url: "https://lcgsens01o.jinr.ru/rest/PhedexTransfers/lastStatus",
+        status_url: "https://t1services.jinr.ru/rest/PhedexTransfers/lastStatus",
     };
 
     this.Utils ={

@@ -3,7 +3,7 @@ var MonstrJournal = function(app_name, options) {
 
     this.Configuration = {
         locale: 'en',
-        status_url: "https://lcgsens01o.jinr.ru/rest/MonstrJournal/getRows",
+        status_url: "https://t1services.jinr.ru/rest/MonstrJournal/getRows",
     };
 
     this.Utils ={

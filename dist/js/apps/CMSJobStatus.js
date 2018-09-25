@@ -3,8 +3,8 @@ var CMSJobStatus = function(app_name, options) {
 
     this.Configuration = {
         locale: 'en',
-        jobs_summary_url: "https://lcgsens01o.jinr.ru/rest/CMSJobStatus/lastStatus",
-        module_status_url: "https://lcgsens01o.jinr.ru/rest/CMSJobStatus/getModuleStatus",
+        jobs_summary_url: "https://t1services.jinr.ru/rest/CMSJobStatus/lastStatus",
+        module_status_url: "https://t1services.jinr.ru/rest/CMSJobStatus/getModuleStatus",
     };
 
     this.Utils = {
