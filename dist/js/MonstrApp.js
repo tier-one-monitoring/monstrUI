@@ -11,7 +11,8 @@ app.controller('maincontroller', function($scope){
       'CMSJobStatus': CMSJobStatus,
       'PhedexQuality': PhedexQuality,
       'PhedexTransfers': PhedexTransfers,
-      'MonstrJournal': MonstrJournal
+      'MonstrJournal': MonstrJournal,
+      'StatusTimeline': StatusTimeline
     };
   });
 });

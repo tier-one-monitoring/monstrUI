@@ -122,3 +122,4 @@ var SSB = function(app_name, options) {
     //app.Configuration.options = options;
     app.Controller.startApp(app_name);
 };
+ 

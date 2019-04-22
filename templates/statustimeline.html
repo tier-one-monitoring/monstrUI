@@ -13,8 +13,10 @@
     <!-- Ionicons -->
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
     <!-- Theme style -->
-    <link rel="stylesheet" href="dist/css/AdminLTE.min.css">
-    <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="/dist/css/AdminLTE.min.css">
+
+    <link rel="stylesheet" href="https://www.amcharts.com/lib/3/plugins/export/export.css" type="text/css" media="all" />
+
     <!-- AdminLTE Skins. We have chosen the skin-blue for this starter
           page. However, you can choose any other skin. Make sure you
           apply the skin class to the body tag so the changes take effect.
@@ -87,7 +89,7 @@
           <!-- User Account: style can be found in dropdown.less -->
           <li class="dropdown user user-menu">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-              <img src="dist/img/user2-160x160.jpg" class="user-image" alt="User Image">
+              <img src="/dist/img/user2-160x160.jpg" class="user-image" alt="User Image">
               <span class="hidden-xs">Igor Pelevanyuk</span>
             </a>
           </li>
@@ -107,7 +109,7 @@
       <!-- Sidebar user panel -->
       <div class="user-panel">
         <div class="pull-left image">
-          <img src="dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
+          <img src="/dist/img/user2-160x160.jpg" class="img-circle" alt="User Image">
         </div>
         <div class="pull-left info">
           <p>Igor Pelevanyuk</p>
@@ -128,7 +130,7 @@
       <!-- sidebar menu: : style can be found in sidebar.less -->
       <ul class="sidebar-menu">
         <li class="header">MAIN NAVIGATION</li>
-        <li class="active">
+        <li>
           <a href="/">
             <i class="fa fa-dashboard"></i> <span>Dashboard</span>
           </a>
@@ -138,7 +140,7 @@
             <i class="fa fa-book"></i> <span>Journal</span>
           </a>
         </li>
-        <li>
+        <li class="active">
           <a href="/statustimeline">
             <i class="fa fa-calendar-check-o"></i> <span>StatusTimeline</span>
           </a>
@@ -165,15 +167,8 @@
 
     <!-- Main content -->
     <section class="content">
-       
-           <smallbox box-app='CMSJobStatus' box-name='CMSJobStatus' box-options='{"delta": "8"}' box-description="for last 8 hours"> </smallbox>
-           <smallbox box-app='SSB' box-name='SSB'> </smallbox>
-           <smallbox box-app='PhedexQuality' box-name='PhedexQualityToProd' box-options='{"instance": "prod", "delta": "12", "direction": "to"}' box-description="To Prod"> </smallbox>
-           <smallbox box-app='PhedexQuality' box-name='PhedexQualityFromProd' box-options='{"instance": "prod", "delta": "12", "direction": "from"}' box-description="From Prod"> </smallbox>
-           <smallbox box-app='PhedexQuality' box-name='PhedexQualityToDebug' box-options='{"instance": "debug", "delta": "12", "direction": "to"}' box-description="To Debug"> </smallbox>
-           <smallbox box-app='PhedexQuality' box-name='PhedexQualityFromDebug' box-options='{"instance": "debug", "delta": "12", "direction": "from"}' box-description="From Debug"> </smallbox>
-           <mediumbox box-app='CMSJobStatus' box-name='CMSJobStatusMed' box-options='{"delta": "24"}' box-description="for last 24 hours"> </mediumbox>
-           <ucmediumbox box-app='PhedexTransfers' box-name='PhedexTransfersProd' box-options='{"instance": "prod", "delta": "2"}' box-description="Last 2 hours"> </ucmediumbox>
+      
+           <ucbigbox box-app='StatusTimeline' box-name='StatusTimeline' box-options='{"delta": "48"}' box-description="Last 48 hours"> </ucbigbox>
 
       <!-- Info boxes -->
 
@@ -221,20 +216,19 @@
     <script src="/dist/js/MonstrLTEUtils.js"></script>
 
     <script src="/plugins/moment/moment.js"></script>
-    <!--<script src="plugins/highcharts/highcharts.js"></script>-->
-    <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script src="https://code.highcharts.com/modules/heatmap.js"></script>
-    <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
-    <script src="dist/js/apps/CMSJobStatus.js"></script>
+
+    <script src="https://www.amcharts.com/lib/3/amcharts.js"></script>
+    <script src="https://www.amcharts.com/lib/3/serial.js"></script>
+    <script src="https://www.amcharts.com/lib/3/gantt.js"></script>
+    <script src="https://www.amcharts.com/lib/3/plugins/export/export.min.js"></script>
+    <script src="https://www.amcharts.com/lib/3/themes/light.js"></script>
+    <script src="/dist/js/apps/MonstrJournal.js"></script>
+    <script src="/dist/js/apps/CMSJobStatus.js"></script>
     <script src="/dist/js/apps/SSB.js"></script>
     <script src="/dist/js/apps/PhedexQuality.js"></script>
     <script src="/dist/js/apps/PhedexTransfers.js"></script>
-    <script src="/dist/js/apps/MonstrJournal.js"></script>
     <script src="/dist/js/apps/StatusTimeline.js"></script>
 
-    <script type="javascript"> 
-    $('.tooltip-inner').css()
-    </script>
 
     </div><!-- ./wrapper -->
 
