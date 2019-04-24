@@ -26,8 +26,16 @@ var StatusTimeline = function(app_name, options) {
 
     this.Model = {
         data: [],
-        min_time: null,
-        max_time: null,
+        detailed_series: null,
+        modules: {},
+        colors_map: {
+            0: "rgb(127,127,127)",
+            10: "rgb(60, 180, 75)",
+            20: "rgb(156, 243, 18)",
+            30: "rgb(255, 255, 0)",
+            40: "rgb(243, 156, 18)",
+            50: "rgb(255, 0, 0)"
+        },
 
         setStatus: function(rest_data) {            
             var event_log = rest_data.data;
@@ -37,34 +45,97 @@ var StatusTimeline = function(app_name, options) {
             
             this.data = rest_data.data;
 
-            // Get all possible status names
-            var statuses = new Set([]);
+            // Fill the object containing module:state
             for (var i = 0; i<this.data.length; i++) {
-                var status_name = this.data[i].module + ':' + this.data[i].name.split(":")[0]
-                statuses.add(status_name);
+                var module = this.data[i].module;
+                var state = this.data[i].state;
+                if (!(module in this.modules)) this.modules[module] = new Set([]);
+                this.modules[module].add(state);
             }
-            console.log(statuses);
 
             //Form dict with statuses names
             var dict = {};
-            statuses.forEach(function(element) { dict[element] = []} );
             console.log(dict);
+            
+            function compare( a, b ) {
+                if ( a.state_start < b.state_start ){
+                    return -1;
+                }
+                if ( a.state_start > b.state_start ){
+                    return 1;
+                }
+                return 0;
+            }
+
 
             // Fill the dict
             for (var i = 0; i<this.data.length; i++) {
-                var status_name = this.data[i].module + ':' + this.data[i].name.split(":")[0]
+                var module = this.data[i].module;
+                var state = this.data[i].state;
+                var category_name = module + ':' + state;
                 var state_start = this.data[i].time;
-                var state = this.data[i].name.split('->')[1];
                 var text = this.data[i].description;
+                var severity = this.data[i].severity
                 var temp = {
-                    "state_start": state_start,
+                    "module": module,
                     "state": state,
-                    "text": text
+                    "category": module + ':' + status_name,
+                    "state_start": moment(state_start),
+                    "state_start_str": state_start,
+                    "text": text,
+                    "severity": severity
                 };
-                dict[status_name].push(temp);
+                if (!(category_name in dict)) { dict[category_name] = []; }
+                dict[category_name].push(temp);
             }
-            console.log(dict);
+            // Prepare data for highcharts
+            // We need data of the following form
+            // {
+            //   name: "SSB:sam3_ce",
+            //   color: "red",
+            //   description: "SAM3 CE: is OK",
+            //   low: 1555882213538,
+            //   high: 1555896614195,
+            // }
+            // Sort the elements of every module:status in order to create intervals
+            this.detailed_series = {};
+            this.categories = [];
+            this.data_series = [];
+            for (var status_name in dict) {
+                dict[status_name].push({
+                    'module': dict[status_name][0].module,
+                    'status_name': status_name,
+                    'state_start': moment(),
+                    'text': 'Artificial state of current moment',
+                    'severity': 0                     
+                })
+                dict[status_name].sort(compare);
+                this.categories.push(status_name);
+                for (var i = 0; i<dict[status_name].length - 1; i++) {
+                    var start_time = dict[status_name][i].state_start;
+                    var module = dict[status_name][i].module;
+                    var status_name = status_name;
+                    var text = dict[status_name][i].text;
+                    var color = this.colors_map[dict[status_name][i].severity];
+                    var stop_time = dict[status_name][i + 1].state_start;
 
+                    var data_point = {
+                        'low': start_time.valueOf(),
+                        'high': stop_time.valueOf(),
+                        'name': status_name,
+                        'module': module,
+                        'text': text,
+                        'color': color,
+                        'severity': dict[status_name][i].severity
+                    };
+                    if (!(module in this.detailed_series)) { this.detailed_series[module] = []; }
+                    this.detailed_series[module].push(data_point);
+                }
+            }
+            for (var module in this.detailed_series) {
+                this.data_series.push({'name': module, 'data': this.detailed_series[module]});
+            }
+            
         },
     };
     //============================================================================
@@ -76,169 +147,102 @@ var StatusTimeline = function(app_name, options) {
 
         initialize: function(appHolderId) {
             this.app_holder_id = appHolderId;
-            $(this.app_holder_id).append('<div id="status_timeline"  style="widht:100%; height: 500px;"></div>');
+            $(this.app_holder_id).append('<div id="status_timeline" style="widht:100%;"></div>');
         },
 
         fillStatusTableWithData: function() {
-            console.log(app.Model.data);
-            var chart = AmCharts.makeChart( "status_timeline", {
-              "type": "gantt",
-              "theme": "light",
-              "marginRight": 70,
-              "period": "DD",
-              "dataDateFormat": "YYYY-MM-DD HH:mm:ss",
-              "columnWidth": 0.5,
-              "valueAxis": {
-                "type": "date"
-              },
-              "brightnessStep": 0,
-              "graph": {
-                "fillAlphas": 1,
-                "lineAlpha": 1,
-                "lineColor": "#fff",
-                "fillAlphas": 0.85,
-                "balloonText": "<b>[[task]]</b>:<br />[[open]] -- [[value]]"
-              },
-              "rotate": true,
-              "categoryField": "category",
-              "segmentsField": "segments",
-              "colorField": "color",
-              "startDateField": "start",
-              "endDateField": "end",
-              "dataProvider": [ {
-                "category": "Module #1",
-                "segments": [ {
-                  "start": "2016-01-01 08:00:00",
-                  "end": "2016-01-01 10:00:00",
-                  "color": "#b90000",
-                  "task": "Gathering requirements"
-                }, {
-                  "start": "2016-01-01 10:00:00",
-                  "end": "2016-01-01 16:00:00",
-                  "color": "#00b900",
-                  "task": "Producing specifications"
-                }, {
-                  "start": "2016-01-01 16:00:00",
-                  "end": "2016-01-02 01:00:00",
-                  "color": "#b90000",
-                  "task": "Development"
-                }, {
-                  "start": "2016-01-02 01:00:00",
-                  "end": "2016-01-02 10:00:00",
-                  "color": "#0000b9",
-                  "task": "Testing and QA"
-                } ]
-              }, {
-                "category": "Module #2",
-                "segments": [ {
-                  "start": "2016-01-01 08:00:00",
-                  "end": "2016-01-01 10:00:00",
-                  "color": "#00b900",
-                  "task": "Gathering requirements"
-                }, {
-                  "start": "2016-01-01 10:00:00",
-                  "end": "2016-01-01 16:00:00",
-                  "color": "#00b900",
-                  "task": "Producing specifications"
-                }, {
-                  "start": "2016-01-01 16:00:00",
-                  "end": "2016-01-02 01:00:00",
-                  "color": "#b90000",
-                  "task": "Development"
-                }, {
-                  "start": "2016-01-02 01:00:00",
-                  "end": "2016-01-02 10:00:00",
-                  "color": "#0000b9",
-                  "task": "Testing and QA"
-                } ]
-              }, {
-                "category": "Module #3",
-                "segments": [ {
-                  "start": "2016-01-01 08:00:00",
-                  "end": "2016-01-01 10:00:00",
-                  "color": "#b90000",
-                  "task": "Gathering requirements"
-                }, {
-                  "start": "2016-01-01 10:00:00",
-                  "end": "2016-01-01 16:00:00",
-                  "color": "#00b900",
-                  "task": "Producing specifications"
-                }, {
-                  "start": "2016-01-01 16:00:00",
-                  "end": "2016-01-02 01:00:00",
-                  "color": "#b90000",
-                  "task": "Development"
-                }, {
-                  "start": "2016-01-02 01:00:00",
-                  "end": "2016-01-02 10:00:00",
-                  "color": "#0000b9",
-                  "task": "Testing and QA"
-                } ]
-              }, {
-                "category": "Module #4",
-                "segments": [ {
-                  "start": "2016-01-01 08:00:00",
-                  "end": "2016-01-01 10:00:00",
-                  "color": "#00b900",
-                  "task": "Gathering requirements"
-                }, {
-                  "start": "2016-01-01 10:00:00",
-                  "end": "2016-01-01 16:00:00",
-                  "color": "#00b900",
-                  "task": "Producing specifications"
-                }, {
-                  "start": "2016-01-01 16:00:00",
-                  "end": "2016-01-02 01:00:00",
-                  "color": "#b90000",
-                  "task": "Development"
-                }, {
-                  "start": "2016-01-02 01:00:00",
-                  "end": "2016-01-02 10:00:00",
-                  "color": "#0000b9",
-                  "task": "Testing and QA"
-                } ]
-              }, {
-                "category": "Module #5",
-                "segments": [ {
-                  "start": "2016-01-01 08:00:00",
-                  "end": "2016-01-01 10:00:00",
-                  "color": "#0000b9",
-                  "task": "Gathering requirements"
-                }, {
-                  "start": "2016-01-01 10:00:00",
-                  "end": "2016-01-01 16:00:00",
-                  "color": "#00b900",
-                  "task": "Producing specifications"
-                }, {
-                  "start": "2016-01-01 16:00:00",
-                  "end": "2016-01-02 01:00:00",
-                  "color": "#b90000",
-                  "task": "Development"
-                }, {
-                  "start": "2016-01-02 01:00:00",
-                  "end": "2016-01-02 10:00:00",
-                  "color": "#0000b9",
-                  "task": "Testing and QA"
-                } ]
-              } ],
-              "valueScrollbar": {
-                "autoGridCount": true
-              },
-              "chartCursor": {
-                "cursorColor": "#55bb76",
-                "valueBalloonsEnabled": false,
-                "cursorAlpha": 0,
-                "valueLineAlpha": 0.5,
-                "valueLineBalloonEnabled": true,
-                "valueLineEnabled": true,
-                "zoomable": false,
-                "valueZoomable": true
-              },
-              "export": {
-                "enabled": true
-              }
-            } );
-        },       
+            console.log(app.Model.categories);
+            console.log(app.Model.data_series);
+            var plotLines = [];
+            var current_line = -0.5;
+            for (var i in app.Model.modules) {
+                 current_line = app.Model.modules[i].size + current_line;
+                 plotLines.push({
+                     color: 'black',
+                     width: 1,
+                     value: current_line,
+                 });
+            }
+            console.log(plotLines);
+
+            this.options = {
+                chart: {
+                    type: 'columnrange',
+                    height: app.Model.categories.length * 30,
+                    inverted: true,
+                    marginTop: 0,
+                    zoomType: 'y',
+                    animation: false
+                },
+             
+                title:{
+                    text: null
+                },
+             
+                plotOptions: {
+                    series: {
+                        states: {
+                            inactive: {
+                                opacity: 1
+                            }
+                        }
+                    },
+                    columnrange: {
+                        groupPadding: 0.5,
+                        pointPadding: 0,
+                        animation: false,
+                        borderWidth: 0,
+                    },
+                },
+                legend: {
+                    enabled: false
+                },
+
+                xAxis: {
+                     type: "category",
+                     categories: app.Model.categories,
+                     plotLines: plotLines,
+                },
+             
+                yAxis: {
+                    type: 'datetime',
+                    //tickInterval: 1000 * 60 * 60 * 4, // 4 hours
+                    gridLineWidth: 1,
+                    gridZIndex: 4,
+                    gridLineColor: 'black',
+                },
+             
+                tooltip: {
+                    formatter: function () {
+                        return '<b>' + this.point.name + '</b>:<br>' +
+                        'Time interval <b>' + moment(this.point.low).format() +
+                        '</b> is <b>' + moment(this.point.high).format() + '</b><br>' + this.point.severity + '<br>' +
+                        'Info: '+ this.point.text;
+                    }
+                },
+             
+                legend: {
+                    enabled: false
+                },
+             
+                series: app.Model.data_series
+            };
+            
+            
+            var chart = $('#status_timeline').highcharts(this.options, function(chart) {
+                         var height = chart.xAxis[0].height;
+                         var pointRange = chart.series[0].data[1].x - chart.series[0].data[0].x;
+                         pointRange = 1;
+                         var max = chart.xAxis[0].max;
+                         var min = chart.xAxis[0].min;
+                         var pointCount = (max - min) / pointRange;
+                         var colWidth = height / (pointCount + 1) - 5;
+                         console.log(pointRange);
+                         console.log(colWidth);
+                         this.options.plotOptions.columnrange.pointWidth = colWidth;
+                         var chart = $('#status_timeline').highcharts(this.options).highcharts();
+            }).highcharts();
+        }       
     };
     //============================================================================
     //    CONTROLLER
@@ -275,3 +279,4 @@ var StatusTimeline = function(app_name, options) {
     app.Configuration.options = JSON.parse(options);
     app.Controller.startApp(app_name);
 };
+
